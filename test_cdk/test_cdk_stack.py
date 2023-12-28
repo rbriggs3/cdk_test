@@ -10,9 +10,7 @@ class TestCdkStack(cdk.Stack):
     def __init__(self, scope: cdk.App, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        ecr_repository = ecr.Repository(self,
-            "ecs-devops-sandbox-repository",
-            repository_name="ecs-devops-sandbox-repository")
+        ecr_repository = ecr.Repository.from_repository_name(self, "ExistingRepository", "ecs-devops-sandbox-repository")
 
         vpc = ec2.Vpc(self,
             "ecs-devops-sandbox-vpc",
@@ -74,7 +72,7 @@ class TestCdkStack(cdk.Stack):
         task_image_options = ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
             family="ecs-devops-sandbox-task-definition",
             execution_role=execution_role,
-            image=ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample"),
+            image=ecs.ContainerImage.from_ecr_repository(repository=ecr_repository, tag="latest"),
             container_name="ecs-devops-sandbox",
             container_port=8080,
             log_driver=ecs.LogDrivers.aws_logs(stream_prefix="ecs-devops-sandbox-container")
